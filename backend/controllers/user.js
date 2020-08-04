@@ -12,7 +12,7 @@ exports.signup = (req, res, next) => {
             const user = new User( req.body.email, hash )
             db.query("INSERT INTO User SET ?", user, function(err, result, fields) {
                 if (err){
-                    return res.status(500).json({ error: "Email déjà utilisé !" });
+                    return res.status(500).json({ error: err.sqlMessage});
                 }
                 //res.status(201).json({ message: "Nouveau compte crée !" });
                 res.status(201).json({ message: result });
