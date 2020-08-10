@@ -1,14 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const db = require('./config/database');
 
 const userRoutes = require('./routes/user');
 const articleRoutes = require('./routes/article');
-
-db.connect(function(err){
-  if (err) throw err;
-  console.log("Connected to MySQL!");
-});
 
 const app = express();
 

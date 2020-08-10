@@ -9,4 +9,11 @@ let connection = mysql.createConnection({
     database : db.name
 });
 
+connection.connect(function(err){
+    if (err){
+        console.log("There was an error : " + err);
+    }
+    console.log("Connected to MySQL!");
+  });
+
 module.exports = connection;
