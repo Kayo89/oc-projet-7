@@ -15,14 +15,33 @@
             </div>
             <button type="submit" class="btn btn-primary" v-if="article.contentTxt.length > 15">Poster !</button>
         </form>
-        <p class="mt-3 text-danger">{{ errorMessage }}</p>
-        <p class="mt-3 text-success font-weight-bold">{{ formRes }}</p>
+        <ErrorMess 
+            :showErrorRes="showError"
+            :errorMessage="errorMessage"
+        />
+        <b-alert
+            :show="dismissCountDown"
+            class="mt-4"
+            dismissible
+            variant="success"
+            @dismissed="dismissCountDown=0"
+            @dismiss-count-down="countDownChanged"
+        >
+            <p>{{ formRes }} {{ dismissCountDown }} seconds...</p>
+            <b-progress
+                variant="success"
+                :max="dismissSecs"
+                :value="dismissCountDown"
+                height="4px"
+            ></b-progress>
+        </b-alert>
     </section>
 </template>
 
 <script>
 
 import VueTrix from 'vue-trix'
+import ErrorMess from '../components/errorMessage'
 
 export default {
     name: 'add-article',
@@ -32,15 +51,27 @@ export default {
                 contentTxt: ""
             },
             errorMessage: "",
-            formRes: ""
+            formRes: "",
+            showSucessRes: false,
+            showError: false,
+            dismissSecs: 3,
+            dismissCountDown: 0,
         }
     },
     components: {
-        VueTrix
+        VueTrix,
+        ErrorMess
     },
     mounted: function(){
         if (!sessionStorage.getItem('token') || !sessionStorage.getItem('userId')){
             this.$router.push('/login')
+        }
+    },
+    updated: function(){
+        if(this.showSucessRes == true){
+            if (this.dismissCountDown == 0){
+                this.$router.push('/articles');
+            }
         }
     },
     methods: {
@@ -56,14 +87,20 @@ export default {
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {
+                        this.showError = true;
                         return this.errorMessage = data.error;
                     }
-                    this.formRes = "Article Créé ! Redirection ..."
-                    setTimeout(() => {
-                        this.$router.push('/articles');
-                    },1500)
+                    this.showAlert();
+                    this.formRes = "Article Créé ! Redirection dans "
                     })
                 .catch(() => this.errorMessage = "Une erreur de connection à l'API est survenue.")
+        },
+        countDownChanged(dismissCountDown) {
+            this.dismissCountDown = dismissCountDown
+        },
+        showAlert() {
+            this.showSucessRes = true;
+            this.dismissCountDown = this.dismissSecs
         }
     }
 }

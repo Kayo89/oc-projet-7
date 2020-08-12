@@ -31,10 +31,10 @@ export default {
     }
   },
   mounted: function(){
-    this.navStatus()
+    this.navStatus();
   },
   updated: function(){
-    this.navStatus()
+    this.navStatus();
   },
   methods: {
     hideModal() {
@@ -46,6 +46,7 @@ export default {
         this.showAddArticle = false
         this.showProfile = false
         this.showArticles = false
+        this.showLogin = true
       }else{
         this.showProfile = true
         this.showDiscon = true

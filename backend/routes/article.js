@@ -7,7 +7,7 @@ const auth = require('../middleware/auth');
 router.post('/', auth, articleController.createArticle);
 
 router.get('/', auth, articleController.getAllArticle);
-router.get('/:id', auth, articleController.getOneArticle);
+router.get('/:id', articleController.getOneArticle);
 
 router.post('/reply', auth, articleController.replyToArticle);
 router.delete('/reply', auth, articleController.deleteOneReply);

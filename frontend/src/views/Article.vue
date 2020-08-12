@@ -2,10 +2,10 @@
     <div class="Article container">
         <section>
             <div class="card border-secondary">
-                <h5 class="card-header ">
-                    Ajouté par : <router-link :to="'/user/'+article.user_id">{{ article.first_name }} {{ article.last_name }}</router-link>, {{ article.date_created | formatDateFromNow}} <span v-if="article.date_edit" class="editDate"> Modifié {{ article.date_edit | formatDateFromNow}}</span>
-                    <section v-if="article.user_id == user_id" class="post-title">
-                        <button  class="btn btn-danger btn-sm" @click="modalShow = !modalShow"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" @click="editArticle(article.id)"><i class="fa fa-pencil" aria-hidden="true"></i> Edit</button>
+                <h5 class="card-header card-title">
+                    <span>Ajouté par <router-link :to="'/user/'+article.user_id">{{ article.first_name }} {{ article.last_name }}</router-link> | {{ article.date_created | formatDateFromNow}} <span v-if="article.date_edit" class="editDate"> Modifié {{ article.date_edit | formatDateFromNow}}</span></span>
+                    <section v-if="article.user_id == user_id">
+                        <button  class="btn btn-danger btn-sm" v-if="replyPost == ''" @click="modalShow = !modalShow"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" @click="editArticle(article.id)"><i class="fa fa-pencil" aria-hidden="true"></i> Edit</button>
                     </section>
                 </h5>
                 <div class="card-body">
@@ -30,23 +30,23 @@
             </form>
         </section>
 
-        <p class="formResponse">{{ formResponse }}</p>
+        <b-alert v-model="showSucessReply" variant="success" dismissible class="mt-4">
+            {{ formResponse }}
+        </b-alert>
 
         <section class="mt-3 mb-3" v-for="reply in replyPost" :key="reply.id">
             <div class="card">
-                <div class="card-header reply-title">
-                    Répondu {{ reply.date_created | formatDateFromNow }}
+                <div class="card-header card-title">
+                    <span>Répondu par <router-link :to="'/user/'+reply.user_id">{{ reply.first_name }} {{ reply.last_name }}</router-link></span>
                     <section v-if="reply.user_id == user_id">
                         <button  class="btn btn-danger btn-sm" @click="deleteReply(reply.id)"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" disabled><i class="fa fa-pencil" aria-hidden="true"></i> Edit</button>
                     </section>
                 </div>
                 <div class="card-body">
-                    <blockquote class="blockquote mb-0">
                     <p v-html="reply.reply_txt"></p>
-                    <footer class="blockquote-footer">
-                        <router-link :to="'/user/'+reply.user_id">{{ reply.first_name }} {{ reply.last_name }}</router-link>
-                    </footer>
-                    </blockquote>
+                </div>
+                <div class="card-footer text-muted footer-reply">
+                    {{ reply.date_created | formatDateFromNow }}
                     <div class="likes">
                         <button class="btn btn-success btn-sm" disabled><i class="fa fa-thumbs-up" aria-hidden="true"></i></button> <button class="btn btn-danger btn-sm" disabled><i class="fa fa-thumbs-down" aria-hidden="true"></i></button>
                     </div>
@@ -54,7 +54,7 @@
             </div>
         </section>
 
-        <b-modal ref="deleteArticle-modal" v-model="modalShow" hide-footer title="Voulez vous vraimnent supprimer l'article ?" hide-backdrop content-class="shadow">
+        <b-modal ref="deleteArticle-modal" v-model="modalShow" hide-footer title="Voulez vous vraiment supprimer cette article ?" hide-backdrop content-class="shadow">
             <b-button class="mt-3 col-6 offset-3" variant="danger" block @click="delPost">Supprimer</b-button>
             <b-button class="mt-2 col-6 offset-3" variant="secondary" block @click="hideModal">Annuler</b-button>
         </b-modal>
@@ -77,8 +77,9 @@ export default {
             reply: {},
             formResponse: null,
             addComButton: "Ajouter un commentaire",
-            updateContent: true,
-            modalShow: false
+            updateContent: null,
+            modalShow: false,
+            showSucessReply: false
         }
     },
     components: {
@@ -88,14 +89,13 @@ export default {
         this.getArticle()
     },
     updated: function(){
-        if(this.updateContent == true){
+        if (this.updateContent == true){
             this.getArticle()
         }
     },
     methods: {
         delPost(){
             const articleId = this.$route.params.id;
-            this.updateContent = false;
             const requestOptions = {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json", 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
@@ -105,7 +105,6 @@ export default {
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {
-                        this.updateContent = true;
                         return this.message = data.error;
                     }
                     
@@ -124,6 +123,7 @@ export default {
             this.formResponse = "[EN DEV 🛠]"
         },
         deleteReply(id){
+            this.updateContent = true;
             const articleId = { replyId: id };
             const requestOptions = {
                 method: "DELETE",
@@ -134,9 +134,9 @@ export default {
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {
-                        this.updateContent = true;
                         return this.message = data.error;
                     }
+                    this.showSucessReply = true;
                     this.formResponse = "Commentaire supprimé !"
                     })
                 .catch(() => this.message = "Une erreur de connection à l'API est survenue.")
@@ -158,6 +158,7 @@ export default {
                         this.article = data.article;
                         this.checkUser = data.article.user_id;
                         this.replyPost = data.reply;
+                        this.updateContent = false;
                     }
                 })
                 .catch(error => {
@@ -177,6 +178,7 @@ export default {
             }
         },
         addReply(){
+            this.updateContent = true;
             this.reply.userId = parseInt(sessionStorage.getItem('userId'));
             this.reply.articleId = this.article.id;
             const requestOptions = {
@@ -190,15 +192,14 @@ export default {
                     if (!response.ok) {
                         return this.message = data.error;
                     }
+                    this.showSucessReply = true;
+                    this.reply.replyText = null;
                     this.formResponse = "Commentaire ajouté !"
                     this.showAddReply = false;
                     this.addComButton = "Ajouter un commentaire"
                     document.getElementById('comButton').classList.remove('btn-danger')
-                    })
+                })
                 .catch(() => this.message = "Une erreur de connection à l'API est survenue.")
-        },
-        testText(){
-            console.log(this.editorContent)
         }
     }
 }
@@ -220,10 +221,17 @@ export default {
                 margin: 0 .2rem 0 .2rem;
             }
         }
-        .reply-title{
+        .card-title{
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
+    }
+    .footer-reply{
+        display: flex;
+        justify-content: space-between;
+        font-size: .8rem;
+        align-items: center;
     }
     .likes{
         display: flex;

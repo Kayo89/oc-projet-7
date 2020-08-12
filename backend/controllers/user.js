@@ -48,8 +48,8 @@ exports.login = (req, res, next) => {
 }
 
 exports.profile = (req, res, next) => {
-    const userId = req.body.userId;
-    db.query("SELECT email, account_created, first_name, last_name FROM User WHERE id='" + userId + "' ", (err, user) => {
+    //const userId = [req.body.userId, req.body.userId, req.body.userId];
+    db.query("SELECT User.email, User.account_created, User.first_name, User.last_name, (SELECT COUNT(Reply.user_id) FROM Reply WHERE user_id = '"+ req.body.userId +"') AS nb_reply,(SELECT COUNT(Article.user_id) FROM Article WHERE user_id = '"+ req.body.userId +"') AS nb_article FROM User WHERE User.id = '"+ req.body.userId +"' ", (err, user) => {
         if(err){
             console.log("Error : " + err);
             return res.status(500).json({error: err})
@@ -61,7 +61,7 @@ exports.profile = (req, res, next) => {
 exports.publicProfile = (req, res, next) => {
     const reqPath = (req.url).substring(1);
     const userId = reqPath.split("profile/");
-    db.query("SELECT account_created, first_name, last_name FROM User WHERE id='" + userId[1] + "' ", (err, user) => {
+    db.query("SELECT account_created, last_conn, first_name, last_name, (SELECT COUNT(Reply.user_id) FROM Reply WHERE user_id = '"+ userId[1]+"') AS nb_reply,(SELECT COUNT(Article.user_id) FROM Article WHERE user_id = '"+ userId[1] +"') AS nb_article FROM User WHERE id='" + userId[1] + "' ", (err, user) => {
         if(err){
             console.log("Error : " + err);
             return res.status(500).json({error: err})

@@ -22,16 +22,27 @@
                 </tbody>
             </table>
         </div>
+        <ErrorMess 
+            :showErrorRes="showErrorRes"
+            :errorMessage="errorMessage"
+        />
     </div>
 </template>
 
 <script>
+
+import ErrorMess from '../components/errorMessage'
+
 export default {
     name: "Articles",
     data(){
         return{
             articles: null,
+            showErrorRes: false
         }
+  },
+  components: {
+      ErrorMess
   },
   mounted: function(){
         if (!sessionStorage.getItem('token') || !sessionStorage.getItem('userId')){
@@ -48,7 +59,8 @@ export default {
                 this.articles = data.DATA;
             })
             .catch(error => {
-                this.errorMessage = error;
+                this.showErrorRes = true 
+                this.errorMessage = "Une erreur de connection à l'API est survenue.";
                 console.error("There was an error!", error);
             });
   }

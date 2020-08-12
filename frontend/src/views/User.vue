@@ -1,9 +1,13 @@
 <template>
-  <div class="User">
+  <div class="User container">
     <h1>{{ user.first_name}} {{ user.last_name }}</h1>
-    <br>
-    <h5>[IN DEV 🛠]</h5>
-    <p class="mt-5 small">Compte créé le : {{ user.account_created | formatDate }}</p>
+    <hr />
+    <ul class="list-group list-group-flush col-12 col-md-7 mx-auto">
+        <li class="list-group-item list-group-item-action">Nombre d'article posté : {{ user.nb_article }}</li>
+        <li class="list-group-item list-group-item-action">Nombre de commentaires posté : {{ user.nb_reply }}</li>
+        <li class="list-group-item list-group-item-action">Compte créé le : {{ user.account_created | formatDate }}</li>
+        <li class="list-group-item list-group-item-action">Dernière connexion : {{ user.last_conn | formatDateFromNow }}</li>
+    </ul>
   </div>
 </template>
 
@@ -39,5 +43,9 @@ export default {
 <style lang="scss">
     .User{
         text-align: center;
+        hr{
+            width: 50%;
+            border: 1px solid black;
+        }
     }
 </style>

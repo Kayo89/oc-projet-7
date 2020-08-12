@@ -15,29 +15,29 @@
             </div>
             <button type="submit" class="btn btn-primary login--button" id="logButton">Log in</button>
         </form>
-        <p id="errorRes" class="mt-3 text-danger">{{ message }}</p>
-        <p class="mt-3 text-danger">{{ errorMessage }}</p>
+        <ErrorMess 
+            :showErrorRes="showError"
+            :errorMessage="errorMessage"
+        />
         <p class="text-center mt-4">Vous n'avez pas encore de compte ? <router-link to="/signup">Créer un compte</router-link></p>
     </section>
 </template>
 
 <script>
 
+import ErrorMess from '../components/errorMessage'
+
 export default {
     name: 'Login',
-    props: {
-        alertMessage: {
-            type: String,
-            require: true
-        }
-    },
     data() {
         return {
-            errors: [],
             user: {},
-            message: this.alertMessage,
             errorMessage: null,
+            showError: false
         }
+    },
+    components: {
+        ErrorMess
     },
     methods: {
         login() {
@@ -50,14 +50,18 @@ export default {
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {
-                        return this.message = data.error;
+                        this.showError = true
+                        return this.errorMessage = data.error;
                     }
-                    let redirectUser = this.$router;
                     sessionStorage.setItem('token', data.token);
                     sessionStorage.setItem('userId', data.userId);
-                    redirectUser.push('/');
+                    this.$router.push('/');
                     })
-                .catch(() => this.message = "Une erreur de connection à l'API est survenue.")
+                .catch(() => {
+                    this.showError = true
+                    this.errorMessage = "Une erreur de connection à l'API est survenue."
+                })
+                    
         }
     }
 }

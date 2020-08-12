@@ -6,25 +6,36 @@
             <li class="list-group-item list-group-item-action">Prénom : {{user.first_name}}</li>
             <li class="list-group-item list-group-item-action">Nom : {{user.last_name}}</li>
             <li class="list-group-item list-group-item-action">Compte crée le : {{user.account_created | formatDate}}</li>
-            <li class="list-group-item list-group-item-action">Nombre d'Article posté : {{user.articleCount}}</li>
-            <li class="list-group-item list-group-item-action">Nombre de commentaire posté : {{user.replyCount}}</li>
+            <li class="list-group-item list-group-item-action">Nombre d'Article posté : {{user.nb_article}}</li>
+            <li class="list-group-item list-group-item-action">Nombre de commentaire posté : {{user.nb_reply}}</li>
         </ul>
         <section class="editSection">
             <button class="btn btn-warning btn-sm" @click="editProfile">Modifier le Profile</button> <button class="btn btn-danger btn-sm" @click="deleteAccount">Supprimer le compte</button>
         </section>
         <p class="inDev mt-5">{{ inDev }}</p>
+        <ErrorMess 
+            :showErrorRes="showErrorRes"
+            :errorMessage="errorMessage"
+        />
     </div>
 </template>
 
 <script>
+
+import ErrorMess from '../components/errorMessage'
 
 export default {
     name: 'Profile',
     data(){
         return {
             user: {},
-            inDev: ""
+            inDev: "",
+            showErrorRes: false,
+            errorMessage: null
         }
+    },
+    components: {
+        ErrorMess
     },
     mounted: function(){
         const userId = { userId: sessionStorage.getItem('userId')};
@@ -41,12 +52,10 @@ export default {
                     return Promise.reject(error);
                 }
                 this.user = data.user[0];
-                let devMessage = "[En Dev 🛠]";
-                this.user.articleCount = devMessage;
-                this.user.replyCount = devMessage;
                 })
             .catch(error => {
-                this.errorMessage = error;
+                this.showErrorRes = true
+                this.errorMessage = "Une erreur de connection à l'API est survenue.";
                 console.error("There was an error!", error);
             });
     },
