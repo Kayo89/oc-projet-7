@@ -1,5 +1,5 @@
 <template>
-    <section class="login col-md-8 offset-md-2 col-lg-6 offset-lg-3 add-article">
+    <section class="login col-md-8 col-lg-7 mx-auto add-article">
         <h1 class="m-4">Ajouter un article</h1>
 
         <form @submit.prevent="addArticle" class="mt-5">
@@ -74,11 +74,5 @@ export default {
         h1, p{
             text-align: center;
         }
-    }
-    .areaText{
-        background-color: white;
-        border: 1px black solid;
-        padding: .5rem;
-        
     }
 </style>

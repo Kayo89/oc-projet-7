@@ -3,16 +3,16 @@
         <section>
             <div class="card border-secondary">
                 <h5 class="card-header ">
-                    Ajouté par : <router-link :to="'/user/'+article.user_id">{{ article.first_name }} {{ article.last_name }}</router-link>, {{ article.date_created | formatDateFromNow}}
+                    Ajouté par : <router-link :to="'/user/'+article.user_id">{{ article.first_name }} {{ article.last_name }}</router-link>, {{ article.date_created | formatDateFromNow}} <span v-if="article.date_edit" class="editDate"> Modifié {{ article.date_edit | formatDateFromNow}}</span>
                     <section v-if="article.user_id == user_id" class="post-title">
-                        <button  class="btn btn-danger btn-sm" @click="modalShow = !modalShow"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" @click="inDev"><i class="fa fa-pencil" aria-hidden="true"></i> Edit</button>
+                        <button  class="btn btn-danger btn-sm" @click="modalShow = !modalShow"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" @click="editArticle(article.id)"><i class="fa fa-pencil" aria-hidden="true"></i> Edit</button>
                     </section>
                 </h5>
                 <div class="card-body">
                     <h5 class="card-title">{{ article.title }}</h5>
                     <p class="card-text" v-html="article.content_txt"></p>
                     <div class="likes">
-                        <button class="btn btn-success btn-sm" @click="inDev"><i class="fa fa-thumbs-up" aria-hidden="true"></i></button> <button class="btn btn-danger btn-sm" @click="inDev"><i class="fa fa-thumbs-down" aria-hidden="true"></i></button>
+                        <button class="btn btn-success btn-sm" disabled><i class="fa fa-thumbs-up" aria-hidden="true"></i></button> <button class="btn btn-danger btn-sm" disabled><i class="fa fa-thumbs-down" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                 <div class="card-header reply-title">
                     Répondu {{ reply.date_created | formatDateFromNow }}
                     <section v-if="reply.user_id == user_id">
-                        <button  class="btn btn-danger btn-sm" @click="deleteReply(reply.id)"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" @click="inDev"><i class="fa fa-pencil" aria-hidden="true"></i> Edit</button>
+                        <button  class="btn btn-danger btn-sm" @click="deleteReply(reply.id)"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" disabled><i class="fa fa-pencil" aria-hidden="true"></i> Edit</button>
                     </section>
                 </div>
                 <div class="card-body">
@@ -48,7 +48,7 @@
                     </footer>
                     </blockquote>
                     <div class="likes">
-                        <button class="btn btn-success btn-sm" @click="inDev"><i class="fa fa-thumbs-up" aria-hidden="true"></i></button> <button class="btn btn-danger btn-sm" @click="inDev"><i class="fa fa-thumbs-down" aria-hidden="true"></i></button>
+                        <button class="btn btn-success btn-sm" disabled><i class="fa fa-thumbs-up" aria-hidden="true"></i></button> <button class="btn btn-danger btn-sm" disabled><i class="fa fa-thumbs-down" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
@@ -112,6 +112,10 @@ export default {
                     this.$router.push('/articles');
                     })
                 .catch(() => this.message = "Une erreur de connection à l'API est survenue.")
+        },
+        editArticle(id){
+            sessionStorage.setItem('articleId_edit', id);
+            this.$router.push('/edit-article')
         },
         hideModal() {
             this.$refs['deleteArticle-modal'].hide()
@@ -241,5 +245,8 @@ export default {
         background-color: white;
         border: 1px black solid;
         padding: .2rem;
+    }
+    .editDate{
+        font-size: .8rem;
     }
 </style>

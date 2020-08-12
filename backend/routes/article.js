@@ -13,6 +13,7 @@ router.post('/reply', auth, articleController.replyToArticle);
 router.delete('/reply', auth, articleController.deleteOneReply);
 
 router.delete('/:id', auth, articleController.deleteArticle);
+router.put('/edit', articleController.editArticle);
 
 
 module.exports = router;

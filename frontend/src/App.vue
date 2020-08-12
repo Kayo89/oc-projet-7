@@ -101,4 +101,9 @@ body{
     }
   }
 }
+.areaText{
+  background-color: white;
+  border: 1px black solid;
+  padding: .5rem;
+}
 </style>

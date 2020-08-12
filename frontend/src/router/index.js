@@ -7,6 +7,7 @@ import Profile from '../views/Profile.vue'
 import Article from '../views/Article.vue'
 import Articles from '../views/Articles.vue'
 import Add_Article from '../views/Add_Article.vue'
+import Edit_Article from '../views/Edit_Article.vue'
 import User from '../views/User.vue'
 
 Vue.use(VueRouter)
@@ -74,6 +75,14 @@ Vue.use(VueRouter)
     component: User,
     meta: {
       title: 'User Profile | Groupomania'
+    }
+  },
+  {
+    path: '/edit-article',
+    name: 'Edit Article',
+    component: Edit_Article,
+    meta: {
+      title: 'Edit Article | Groupomania'
     }
   }
 ]

@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const DATE_FORMATER = require( 'dateformat' );
 
 const Article =  require('../models/Article');
 const Reply =  require('../models/Reply');
@@ -27,7 +28,7 @@ exports.getOneArticle = (req, res, next) => {
     const id = (req.url).substring(1);
     let article = null;
     let reply = null;
-    db.query("SELECT Article.id, Article.title, Article.content_txt, Article.date_created, Article.user_id, User.first_name, User.last_name FROM Article INNER JOIN User ON Article.user_id = User.id WHERE Article.id=" + id, 
+    db.query("SELECT Article.id, Article.title, Article.content_txt, Article.date_created, Article.date_edit, Article.user_id, User.first_name, User.last_name FROM Article INNER JOIN User ON Article.user_id = User.id WHERE Article.id=" + id, 
         function(err, result) {
             if (err){
                 return res.status(500).json({ error: err.sqlMessage});
@@ -76,5 +77,15 @@ exports.deleteOneReply = (req, res, next) => {
             return res.status(500).json({ error: err.sqlMessage});
         }
         res.status(200).json({message: "Reply Supprimé !"})
+    })
+}
+
+exports.editArticle = (req, res, next) => {
+    const article = [req.body.title, req.body.content_txt, DATE_FORMATER( new Date(), "yyyy-mm-dd HH:MM:ss" ), req.body.articleId];
+    db.query("UPDATE Article SET title = ?, content_txt = ?, date_edit = ? WHERE id= ?", article, (err, result) => {
+        if (err){
+            return res.status(500).json({ error: err.sqlMessage});
+        }
+        res.status(200).json({message: "Article modifié"})
     })
 }
