@@ -3,10 +3,11 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
-import Logout from '../views/logout.vue'
 import Profile from '../views/Profile.vue'
 import Article from '../views/Article.vue'
+import Articles from '../views/Articles.vue'
 import Add_Article from '../views/Add_Article.vue'
+import User from '../views/User.vue'
 
 Vue.use(VueRouter)
 
@@ -44,14 +45,6 @@ Vue.use(VueRouter)
     }
   },
   {
-    path: '/logout',
-    name: 'Log Out',
-    component: Logout,
-    meta: {
-      title: 'Se déconnecter | Groupomania'
-    }
-  },
-  {
     path: '/profile',
     name: 'Profile',
     component: Profile,
@@ -65,6 +58,22 @@ Vue.use(VueRouter)
     component: Article,
     meta: {
       title: 'Article | Groupomania'
+    }
+  },
+  {
+    path: '/articles',
+    name: 'Articles',
+    component: Articles,
+    meta: {
+      title: 'Articles | Groupomania'
+    }
+  },
+  {
+    path: '/user/:id',
+    name: 'User',
+    component: User,
+    meta: {
+      title: 'User Profile | Groupomania'
     }
   }
 ]

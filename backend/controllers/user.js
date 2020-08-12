@@ -20,7 +20,6 @@ exports.signup = (req, res, next) => {
         .catch(() => res.status(500).json({ error: "Erreur d'enregistrement de l'utilisateur." }));
 }
 exports.login = (req, res, next) => {
-    console.log(req.body)
     db.query("SELECT id,email,password FROM User WHERE email='" + req.body.email + "'", (err, user) => {
         if (err) throw err;
         if (user.length < 1){
@@ -45,5 +44,28 @@ exports.login = (req, res, next) => {
                 })
             })
             .catch(() => res.status(500).json({ error: "Erreur vérification Password.", errorCode: 40003 }))
+    })
+}
+
+exports.profile = (req, res, next) => {
+    const userId = req.body.userId;
+    db.query("SELECT email, account_created, first_name, last_name FROM User WHERE id='" + userId + "' ", (err, user) => {
+        if(err){
+            console.log("Error : " + err);
+            return res.status(500).json({error: err})
+        }
+        res.status(200).json({user: user})
+    })
+}
+
+exports.publicProfile = (req, res, next) => {
+    const reqPath = (req.url).substring(1);
+    const userId = reqPath.split("profile/");
+    db.query("SELECT account_created, first_name, last_name FROM User WHERE id='" + userId[1] + "' ", (err, user) => {
+        if(err){
+            console.log("Error : " + err);
+            return res.status(500).json({error: err})
+        }
+        res.status(200).json({user: user})
     })
 }

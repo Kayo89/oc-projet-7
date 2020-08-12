@@ -9,4 +9,10 @@ router.post('/', auth, articleController.createArticle);
 router.get('/', auth, articleController.getAllArticle);
 router.get('/:id', auth, articleController.getOneArticle);
 
+router.post('/reply', auth, articleController.replyToArticle);
+router.delete('/reply', auth, articleController.deleteOneReply);
+
+router.delete('/:id', auth, articleController.deleteArticle);
+
+
 module.exports = router;
