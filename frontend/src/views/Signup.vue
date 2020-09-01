@@ -20,6 +20,13 @@
                         <label for="last-name">Nom</label>
                         <input class="form-control" type="text" placeholder="Nom" name="last-name" id="last-name" v-model="user.lastName" required>
                     </div>
+                    <div class="form-group col-6">
+                        <label for="sexe-select">Sexe</label>
+                        <select class="form-control" name="sexe-select" id="sexe-select" v-model="user.gender" required>
+                            <option value="man">Homme</option>
+                            <option value="woman">Femme</option>
+                        </select>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary sign-in--button">Sign In</button>
                 <p class="mt-3 text-danger">{{ message }}</p>
@@ -59,7 +66,7 @@ export default {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify( this.user )
             }
-            fetch("http://192.168.1.16:3000/api/auth/signup", requestOptions)
+            fetch("/api/auth/signup", requestOptions)
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -83,7 +90,7 @@ export default {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify( this.user )
             }
-            fetch("http://192.168.1.16:3000/api/auth/login", requestOptions)
+            fetch("/api/auth/login", requestOptions)
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {

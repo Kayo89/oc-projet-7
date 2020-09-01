@@ -3,16 +3,16 @@
         <section>
             <div class="card border-secondary">
                 <h5 class="card-header card-title">
-                    <span>Ajouté par <router-link :to="'/user/'+article.user_id">{{ article.first_name }} {{ article.last_name }}</router-link> | {{ article.date_created | formatDateFromNow}} <span v-if="article.date_edit" class="editDate"> Modifié {{ article.date_edit | formatDateFromNow}}</span></span>
+                    <span>Ajouté par <router-link :to="'/user/'+article.user_id"><img v-if="article.photo_url" :src="'http://localhost:3000/images/'+article.photo_url"> {{ article.first_name }} {{ article.last_name }}</router-link> • {{ article.date_created | formatDateFromNow}} <span v-if="article.date_edit" class="editDate">• Modifié {{ article.date_edit | formatDateFromNow}}</span></span>
                     <section v-if="article.user_id == user_id">
-                        <button  class="btn btn-danger btn-sm" v-if="replyPost == ''" @click="modalShow = !modalShow"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" @click="editArticle(article.id)"><i class="fa fa-pencil" aria-hidden="true"></i> Edit</button>
+                        <button  class="btn btn-danger btn-sm" v-if="replyPost == ''" @click="modalShow = !modalShow"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" @click="modify(null, 'article')"><i class="fa fa-pencil" aria-hidden="true"></i> Modifier</button>
                     </section>
                 </h5>
                 <div class="card-body">
                     <h5 class="card-title">{{ article.title }}</h5>
-                    <p class="card-text" v-html="article.content_txt"></p>
+                    <p class="card-text article-txt" v-html="article.content_txt"></p>
                     <div class="likes">
-                        <button class="btn btn-success btn-sm" disabled><i class="fa fa-thumbs-up" aria-hidden="true"></i></button> <button class="btn btn-danger btn-sm" disabled><i class="fa fa-thumbs-down" aria-hidden="true"></i></button>
+                        <button class="btn btn-success btn-sm" v-bind:style="likeButton" @click="like(1)">{{ article.likes }}&nbsp;<i  class="fa fa-thumbs-up" aria-hidden="true"></i></button> <button class="btn btn-danger btn-sm" v-bind:style="dislikeButton" @click="like(-1)">{{ article.dislikes }}&nbsp;<i class="fa fa-thumbs-down" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
@@ -34,19 +34,21 @@
             {{ formResponse }}
         </b-alert>
 
-        <section class="mt-3 mb-3" v-for="reply in replyPost" :key="reply.id">
+        <section class="mt-3 mb-3 reply" v-for="reply in replyPost" :key="reply.id">
             <div class="card">
                 <div class="card-header card-title">
-                    <span>Répondu par <router-link :to="'/user/'+reply.user_id">{{ reply.first_name }} {{ reply.last_name }}</router-link></span>
+                    <span>Répondu par <router-link :to="'/user/'+reply.user_id"><img v-if="reply.photo_url" :src="'http://localhost:3000/images/'+reply.photo_url"> {{ reply.first_name }} {{ reply.last_name }}</router-link></span>
                     <section v-if="reply.user_id == user_id">
-                        <button  class="btn btn-danger btn-sm" @click="deleteReply(reply.id)"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" disabled><i class="fa fa-pencil" aria-hidden="true"></i> Edit</button>
+                        <button  class="btn btn-danger btn-sm" @click="deleteReply(reply.id)"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm"  @click="modify(reply.id, 'reply')"><i class="fa fa-pencil" aria-hidden="true"></i> Modifier</button>
                     </section>
                 </div>
                 <div class="card-body">
                     <p v-html="reply.reply_txt"></p>
                 </div>
                 <div class="card-footer text-muted footer-reply">
-                    {{ reply.date_created | formatDateFromNow }}
+                    <span>Ajouté {{ reply.date_created | formatDateFromNow }}
+                    <span v-if="reply.date_edit" class="editDate">| Modifié {{ reply.date_edit | formatDateFromNow}}</span></span>
+                    
                     <div class="likes">
                         <button class="btn btn-success btn-sm" disabled><i class="fa fa-thumbs-up" aria-hidden="true"></i></button> <button class="btn btn-danger btn-sm" disabled><i class="fa fa-thumbs-down" aria-hidden="true"></i></button>
                     </div>
@@ -54,7 +56,7 @@
             </div>
         </section>
 
-        <b-modal ref="deleteArticle-modal" v-model="modalShow" hide-footer title="Voulez vous vraiment supprimer cette article ?" hide-backdrop content-class="shadow">
+        <b-modal ref="deleteArticle-modal" v-model="modalShow" hide-footer centered title="Voulez vous vraiment supprimer cette article ?" hide-backdrop content-class="shadow">
             <b-button class="mt-3 col-6 offset-3" variant="danger" block @click="delPost">Supprimer</b-button>
             <b-button class="mt-2 col-6 offset-3" variant="secondary" block @click="hideModal">Annuler</b-button>
         </b-modal>
@@ -63,7 +65,7 @@
 
 <script>
 
-import VueTrix from "vue-trix";
+import VueTrix from "vue-trix"
 
 export default {
     name: 'Article',
@@ -71,7 +73,7 @@ export default {
         return{
             article: {},
             checkUser: null,
-            user_id: sessionStorage.getItem('userId'),
+            user_id: parseInt(sessionStorage.getItem('userId')),
             replyPost: {},
             showAddReply: false,
             reply: {},
@@ -79,7 +81,16 @@ export default {
             addComButton: "Ajouter un commentaire",
             updateContent: null,
             modalShow: false,
-            showSucessReply: false
+            showSucessReply: false,
+            likeStatus: null,
+            dislikeBool: false,
+            likeBool: false,
+            likeButton: {
+                opacity: 1
+            },
+            dislikeButton: {
+                opacity: 1
+            }
         }
     },
     components: {
@@ -98,10 +109,12 @@ export default {
             const articleId = this.$route.params.id;
             const requestOptions = {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json", 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
-                body: ""
+                headers: {  "Content-Type": "application/json", 
+                            "Authorization": 'Bearer ' + sessionStorage.getItem('token')},
+                body: JSON.stringify({ userId: this.user_id })
             }
-            fetch("http://192.168.1.16:3000/api/article/" + articleId, requestOptions)
+            console.log(requestOptions)
+            fetch("http://localhost:3000/api/article/" + articleId, requestOptions)
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -112,9 +125,30 @@ export default {
                     })
                 .catch(() => this.message = "Une erreur de connection à l'API est survenue.")
         },
-        editArticle(id){
-            sessionStorage.setItem('articleId_edit', id);
-            this.$router.push('/edit-article')
+        like(status){
+            const notation = {likeStatus: status, userId: parseInt(sessionStorage.getItem('userId')), articleId: this.article.id }
+            const requestOptions = {
+                method: "POST",
+                headers: { "Content-Type": "application/json", 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
+                body: JSON.stringify( notation )
+            }
+            fetch("/api/article/notation", requestOptions)
+                .then(async response => {
+                    const data = await response.json();
+                    if (!response.ok) {
+                        return this.message = data.error;
+                    }
+                    this.getArticle()
+                })
+                .catch(() => this.message = "Une erreur de connection à l'API est survenue.")
+        },
+        modify(replyId, content){
+            if (content == "reply"){
+                this.$store.commit("setReplyId", { replyId: replyId })
+            }
+            this.$store.commit("setArticleId", { articleId: this.article.id })
+            this.$store.commit("whatToModify", { content: content})
+            this.$router.push('/edit')
         },
         hideModal() {
             this.$refs['deleteArticle-modal'].hide()
@@ -124,13 +158,13 @@ export default {
         },
         deleteReply(id){
             this.updateContent = true;
-            const articleId = { replyId: id };
+            const articleId = { replyId: id, userId: this.user_id };
             const requestOptions = {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json", 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
                 body: JSON.stringify( articleId )
             }
-            fetch("http://192.168.1.16:3000/api/article/reply", requestOptions)
+            fetch("/api/article/reply", requestOptions)
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -144,7 +178,7 @@ export default {
         getArticle(){
             const id = this.$route.params.id;
             const headers = { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') }
-            fetch("http://192.168.1.16:3000/api/article/" + id, { headers })
+            fetch("/api/article/" + id, { headers })
                 .then(async response => {
                     const data = await response.json();
 
@@ -158,6 +192,7 @@ export default {
                         this.article = data.article;
                         this.checkUser = data.article.user_id;
                         this.replyPost = data.reply;
+                        this.likeList();
                         this.updateContent = false;
                     }
                 })
@@ -165,6 +200,35 @@ export default {
                     this.errorMessage = error;
                     console.error("There was an error!", error);
                 });
+        },
+        likeList(){
+            if (this.article.dislikedUsers){
+                let userListDislike = this.article.dislikedUsers.split(',')
+                for (let user of userListDislike){
+                    if (this.user_id == user){
+                        this.likeButton.opacity = 0.6;
+                        return this.dislikeButton.opacity = 1;
+                    }else{
+                        this.likeButton.opacity = 1;
+                    }
+                }
+            }else{
+                this.likeButton.opacity = 1;
+            }
+
+            if (this.article.likedUsers){
+                let userListLike = this.article.likedUsers.split(',')
+                for (let user of userListLike){
+                    if (this.user_id == user){
+                         this.dislikeButton.opacity = 0.6;
+                         return this.likeButton.opacity = 1;
+                    }else{
+                        this.dislikeButton.opacity = 1;
+                    }
+                }
+            }else{
+                this.dislikeButton.opacity = 1;
+            }
         },
         addReplyButton(){
             if(!this.showAddReply){
@@ -186,7 +250,7 @@ export default {
                 headers: { "Content-Type": "application/json", 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
                 body: JSON.stringify( this.reply )
             }
-            fetch("http://192.168.1.16:3000/api/article/reply", requestOptions)
+            fetch("/api/article/reply", requestOptions)
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -225,6 +289,19 @@ export default {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            img{
+                width: 35px;
+                border-radius: 50%;
+            }
+        }
+        .reply{
+            .card-title{
+                img{
+                    width: 30px;
+                    border-radius: 50%;
+                }
+                
+            }
         }
     }
     .footer-reply{

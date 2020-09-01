@@ -16,7 +16,7 @@
             <button type="submit" class="btn btn-primary" v-if="article.contentTxt.length > 15">Poster !</button>
         </form>
         <ErrorMess 
-            :showErrorRes="showError"
+            :showErrorRes="showErrorRes"
             :errorMessage="errorMessage"
         />
         <b-alert
@@ -53,9 +53,10 @@ export default {
             errorMessage: "",
             formRes: "",
             showSucessRes: false,
-            showError: false,
-            dismissSecs: 3,
+            showErrorRes: false,
+            dismissSecs: 2,
             dismissCountDown: 0,
+            articleId: null
         }
     },
     components: {
@@ -70,7 +71,7 @@ export default {
     updated: function(){
         if(this.showSucessRes == true){
             if (this.dismissCountDown == 0){
-                this.$router.push('/articles');
+                this.$router.push('/article/' + this.articleId);
             }
         }
     },
@@ -83,17 +84,22 @@ export default {
                             "Authorization": "Bearer " + sessionStorage.getItem('token') },
                 body: JSON.stringify( this.article )
             }
-            fetch("http://192.168.1.16:3000/api/article", requestOptions)
+            fetch("/api/article", requestOptions)
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {
-                        this.showError = true;
+                        this.showErrorRes = true;
                         return this.errorMessage = data.error;
                     }
+                    this.articleId = data.status.insertId;
                     this.showAlert();
                     this.formRes = "Article Créé ! Redirection dans "
                     })
-                .catch(() => this.errorMessage = "Une erreur de connection à l'API est survenue.")
+                .catch(() => {
+                    this.showErrorRes = true
+                    this.errorMessage = "Une erreur de connection à l'API est survenue."
+                    })
+                    
         },
         countDownChanged(dismissCountDown) {
             this.dismissCountDown = dismissCountDown

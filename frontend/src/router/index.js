@@ -8,7 +8,12 @@ import Article from '../views/Article.vue'
 import Articles from '../views/Articles.vue'
 import Add_Article from '../views/Add_Article.vue'
 import Edit_Article from '../views/Edit_Article.vue'
+import Edit from '../views/ModifyContent.vue'
 import User from '../views/User.vue'
+import Edit_Profile from '../views/Edit_Profile.vue'
+
+
+import Dev from '../views/Dev.vue'
 
 Vue.use(VueRouter)
 
@@ -83,6 +88,30 @@ Vue.use(VueRouter)
     component: Edit_Article,
     meta: {
       title: 'Edit Article | Groupomania'
+    }
+  },
+  {
+    path: '/edit',
+    name: 'Edit',
+    component: Edit,
+    meta: {
+      title: 'Edit | Groupomania'
+    }
+  },
+  {
+    path: '/edit-profile',
+    name: 'Modifier Profile',
+    component: Edit_Profile,
+    meta: {
+      title: 'Modifier Profile | Groupomania'
+    }
+  },
+  {
+    path: '/dev',
+    name: 'Dev',
+    component: Dev,
+    meta: {
+      title: 'Dev | Groupomania'
     }
   }
 ]

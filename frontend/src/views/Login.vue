@@ -46,7 +46,7 @@ export default {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify( this.user )
             }
-            fetch("http://192.168.1.16:3000/api/auth/login", requestOptions)
+            fetch("/api/auth/login", requestOptions)
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {

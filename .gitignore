@@ -1,3 +1,5 @@
 node_modules
 user_id.js
 .DS_Store
+*.png
+*.jpg

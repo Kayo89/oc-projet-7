@@ -11,6 +11,11 @@ Vue.filter('formatDate', function(value) {
     return moment(String(value)).format('DD/MM/YYYY à HH:mm')
   }
 });
+Vue.filter('formatDateShort', function(value) {
+  if (value) {
+    return moment(String(value)).format('DD/MM/YYYY')
+  }
+});
 Vue.filter('formatDateFromNow', function(value) {
   if (value) {
     return moment(String(value)).fromNow();

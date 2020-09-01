@@ -50,12 +50,13 @@ export default {
             form: {
                 title: '',
                 content_txt: '',
-                articleId: sessionStorage.getItem('articleId_edit')
+                articleId: sessionStorage.getItem('articleId_edit'),
+                userId: parseInt(sessionStorage.getItem('userId'))
             },
             errorMessage: null,
             formRes: null,
             showError: false,
-            dismissSecs: 3,
+            dismissSecs: 1,
             dismissCountDown: 0,
             showSucessRes: false
         }
@@ -81,7 +82,7 @@ export default {
                             "Authorization": "Bearer " + sessionStorage.getItem('token') },
                 body: JSON.stringify( this.form )
             }
-            fetch("http://192.168.1.16:3000/api/article/edit", requestOptions)
+            fetch("/api/article/edit", requestOptions)
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -102,7 +103,7 @@ export default {
                 return this.errorMessage = "Erreur, aucun article à modifier"
             }
             const headers = { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') }
-            fetch("http://192.168.1.16:3000/api/article/" + this.form.articleId, { headers })
+            fetch("/api/article/" + this.form.articleId, { headers })
                 .then(async response => {
                     const data = await response.json();
 

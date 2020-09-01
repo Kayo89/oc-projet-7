@@ -15,7 +15,17 @@ exports.createArticle = (req, res, next) => {
 }
 
 exports.getAllArticle = (req, res, next) => {
-    db.query("SELECT Article.id, Article.title, Article.date_created, Article.content_txt, Article.user_id, User.first_name, User.last_name, COUNT(Reply.article_id) AS replyCount FROM Reply RIGHT JOIN Article ON Reply.article_id = Article.id INNER JOIN User ON Article.user_id = User.id GROUP BY Article.id ORDER BY replyCount DESC", 
+    db.query("SELECT Article.id, Article.title, Article.likes, Article.dislikes, Article.date_created, Article.content_txt, Article.user_id, User.first_name, User.last_name, COUNT(Reply.article_id) AS replyCount FROM Reply RIGHT JOIN Article ON Reply.article_id = Article.id INNER JOIN User ON Article.user_id = User.id GROUP BY Article.id ORDER BY replyCount DESC", 
+        function(err, result) {
+            if (err){
+                return res.status(500).json({ error: err.sqlMessage});
+            }
+            res.status(200).json({ DATA: result});
+    })
+}
+
+exports.getLastArticle = (req, res, next) => {
+    db.query("SELECT Article.id, Article.title, Article.date_created, Article.likes, Article.dislikes, Article.content_txt, Article.user_id, User.first_name, User.last_name, COUNT(Reply.article_id) AS replyCount FROM Reply RIGHT JOIN Article ON Reply.article_id = Article.id INNER JOIN User ON Article.user_id = User.id GROUP BY Article.id ORDER BY Article.date_created DESC LIMIT 4", 
         function(err, result) {
             if (err){
                 return res.status(500).json({ error: err.sqlMessage});
@@ -28,13 +38,13 @@ exports.getOneArticle = (req, res, next) => {
     const id = (req.url).substring(1);
     let article = null;
     let reply = null;
-    db.query("SELECT Article.id, Article.title, Article.content_txt, Article.date_created, Article.date_edit, Article.user_id, User.first_name, User.last_name FROM Article INNER JOIN User ON Article.user_id = User.id WHERE Article.id=" + id, 
+    db.query("SELECT Article.id, Article.title, Article.content_txt, Article.likedUsers, Article.likes, Article.dislikedUsers, Article.dislikes, Article.date_created, Article.date_edit, Article.user_id, User.photo_url, User.first_name, User.last_name FROM Article INNER JOIN User ON Article.user_id = User.id WHERE Article.id=" + id, 
         function(err, result) {
             if (err){
                 return res.status(500).json({ error: err.sqlMessage});
             }
             article = result[0];
-            db.query("SELECT Reply.id, Reply.article_id, Reply.date_created, Reply.reply_txt, Reply.user_id, User.first_name, User.last_name FROM Reply INNER JOIN User ON Reply.user_id = User.id WHERE article_id = '" + article.id + "' ", 
+            db.query("SELECT Reply.id, Reply.date_edit, Reply.article_id, Reply.date_created, Reply.reply_txt, Reply.user_id, User.first_name, User.photo_url, User.last_name FROM Reply INNER JOIN User ON Reply.user_id = User.id WHERE article_id = '" + article.id + "' ", 
                 (err, result) => {
                     if (err){
                         return res.status(500).json({ error: err.sqlMessage});
@@ -88,4 +98,117 @@ exports.editArticle = (req, res, next) => {
         }
         res.status(200).json({message: "Article modifié"})
     })
+}
+
+exports.getOneReply = (req, res, next) => {
+    const replyId = [req.body.replyId];
+    db.query("SELECT * FROM Reply WHERE id= ?", replyId, (err, result) => {
+        if (err){
+            return res.status(500).json({ error: err.sqlMessage});
+        }
+        res.status(200).json({reply: result})
+    })
+}
+
+exports.editReply = (req, res, next) => {
+    const reply = [req.body.reply_txt, DATE_FORMATER( new Date(), "yyyy-mm-dd HH:MM:ss" ), req.body.replyId];
+    db.query("UPDATE Reply SET reply_txt = ?, date_edit = ? WHERE id= ?", reply, (err, result) => {
+        if (err){
+            return res.status(500).json({ error: err.sqlMessage});
+        }
+        res.status(200).json({message: "Commentaire modifié"})
+    })
+}
+
+exports.addNotationsToArticle = (req, res, next) => {
+    const likeStatus = req.body.likeStatus;
+    const articleId = req.body.articleId;
+    const userId = req.body.userId;
+
+    db.query("SELECT * FROM Article WHERE id="+articleId, (err, result) => {
+        let updateNotation = null;
+
+        if (likeStatus == 1){
+            updateNotation = addNotation(
+                likeStatus, 
+                userId, 
+                result[0].likedUsers, 
+                result[0].dislikedUsers)
+        }
+
+        else if (likeStatus == -1){
+            updateNotation = addNotation(
+                likeStatus, 
+                userId, 
+                result[0].dislikedUsers, 
+                result[0].likedUsers)
+        }
+        updateNotation.push(articleId);
+        db.query("UPDATE Article SET likedUsers = ?, likes = ?, dislikedusers = ?, dislikes = ? WHERE id= ?", updateNotation, (err, result) => {
+            if (err){
+                return res.status(500).json({ error: err.sqlMessage});
+            }
+            res.status(200).json({ newLikeCount: updateNotation[1], newDislikeCount: updateNotation[3]})
+        })
+    })
+}
+
+function arrayRemove(arr, value) { 
+    return arr.filter(function(elem){
+        return elem != value; 
+    });
+};
+
+function addNotation(likeStatus, userId, addNotationUsers, rmNotationUsers){
+    let newNotationUsers = null;
+    let newNotationUsersCount = 0;
+    let newRmNotationUsers = null;
+    let newRmNotationUsersCount = 0;
+    let articleNewNotation = null;
+
+    if (!addNotationUsers){ // Si aucun utilisateur est dans la liste like/dislike
+        newNotationUsers = [userId];
+        newNotationUsers = newNotationUsers.toString()
+    }
+    else{
+        newNotationUsers = addNotationUsers.split(','); // Split la liste des utilisateurs en Array
+        for (let userList of newNotationUsers) {
+            if (userList == userId){ // Cherche si l'utilisateur ce trouve déjà dans la liste des like/dislike
+                newNotationUsers = arrayRemove(newNotationUsers, userId); // Enleve l'ID utilisateur de la liste
+                if (newNotationUsers == ''){
+                    newNotationUsers = null;
+                }else{
+                    newNotationUsers = newNotationUsers.toString()
+                }
+            }
+        }
+        if(newNotationUsers == addNotationUsers){ // Si les deux listes d'utilisateur sont égaux, ça veut dire qu'il faut ajouter l'ID user
+            newNotationUsers.push(userId)
+            newNotationUsers = newNotationUsers.toString()
+        }
+    }
+    
+    if (rmNotationUsers){
+        newRmNotationUsers = arrayRemove(rmNotationUsers.split(','), userId);
+    }
+
+    if (newRmNotationUsers){
+        newRmNotationUsers = newRmNotationUsers.toString();
+    }
+
+    if (newNotationUsers){
+        newNotationUsersCount = newNotationUsers.split(',').length
+    }
+    if (newRmNotationUsers){
+        newRmNotationUsersCount = newRmNotationUsers.split(',').length
+    }
+
+    if (likeStatus == 1){
+        articleNewNotation = [newNotationUsers, newNotationUsersCount, newRmNotationUsers, newRmNotationUsersCount];
+    }
+    else if (likeStatus == -1){
+        articleNewNotation = [newRmNotationUsers, newRmNotationUsersCount, newNotationUsers, newNotationUsersCount];
+    }
+
+    return articleNewNotation;
 }
