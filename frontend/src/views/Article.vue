@@ -160,9 +160,6 @@ export default {
         hideModal() {
             this.$refs['deleteArticle-modal'].hide()
         },
-        inDev(){
-            this.formResponse = "[EN DEV 🛠]"
-        },
         deleteReply(id){
             this.updateContent = true;
             const articleId = { replyId: id, userId: this.user_id };
