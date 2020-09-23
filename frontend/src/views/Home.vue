@@ -9,7 +9,7 @@
           content-class="mt-3" 
           align="center"
           active-nav-item-class="font-weight-bold text-uppercase text-danger"
-          class="testing"
+          class="home__articles"
           >
           <b-tab title="Nouveauté" active>
             <Articles
@@ -109,28 +109,14 @@ export default {
     .nav-item{
       font-size: 3rem;
     }
+    &__articles{
+      background-color: lighten($color: rgb(202, 234, 236), $amount: 2);
+      border: 1px solid darken($color: rgb(202, 234, 236), $amount: 10);
+      border-radius: 10px;
+      box-shadow: 5px 5px 5px darken($color: rgb(202, 234, 236), $amount: 10);
+    }
   }
   h1, h2, p{
     text-align: center;
-  }
-  .button--top{
-    display: flex;
-    justify-content: space-between;
-      button{
-            margin-top: 2rem;
-            margin-right: 1rem;
-            margin-left: 1rem;
-      }
-  }
-  .button--bottom{
-    display: flex;
-    justify-content: flex-end;
-    margin-right: 1rem;
-  }
-  .testing{
-    background-color: lighten($color: rgb(202, 234, 236), $amount: 2);
-    border: 1px solid darken($color: rgb(202, 234, 236), $amount: 10);
-    border-radius: 10px;
-    box-shadow: 5px 5px 5px darken($color: rgb(202, 234, 236), $amount: 10);
   }
 </style>
