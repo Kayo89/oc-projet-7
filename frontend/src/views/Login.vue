@@ -1,25 +1,34 @@
 <template>
-    <section class="login col-md-8 offset-md-2 col-lg-6 offset-lg-3 Login" id="login">
-        <h1 class="login--title m-4">Login</h1>
-
-        <form @submit.prevent="login" id="login-form" class="mt-5">
+    <section class="login col-md-8 col-lg-6 mx-auto">
+        <h1 class="login--title m-4">Connectez-vous à votre compte</h1>
+    
+        <form @submit.prevent="login" id="login-form" class="mt-5" v-if="errorCode < 40003">
             <div class="form-row">
-                <div class="form-group col-12">
-                    <label for="email">Email</label>
+                <div class="input-group col-10 mx-auto mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><font-awesome-icon icon="envelope" /></span>
+                    </div>
                     <input class="form-control" type="email" placeholder="Email" v-model="user.email" name="email" id="email" required>
                 </div>
-                <div class="form-group col-12">
-                    <label for="password">Password</label>
+                <div class="input-group col-10 mx-auto mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><font-awesome-icon icon="lock" /></span>
+                    </div>
                     <input class="form-control" type="password" placeholder="Password" v-model="user.password" name="password" id="password" required>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary login--button" id="logButton">Log in</button>
+            <button type="submit" class="btn btn-primary login--button" id="logButton">Se connecter</button>
+            <p class="text-center mt-4">Vous n'avez pas encore de compte ? <router-link to="/signup">Créer un compte</router-link></p>
         </form>
         <ErrorMess 
             :showErrorRes="showError"
             :errorMessage="errorMessage"
         />
-        <p class="text-center mt-4">Vous n'avez pas encore de compte ? <router-link to="/signup">Créer un compte</router-link></p>
+        <p v-if="errorCode > 40003" class="font-weight-bold mt-4">
+            Vous pouvez nous contactez à cette adresse mail : 
+            <br /><br />
+            <a href="mailto:support@groupomania.com">support@groupomania.com</a>
+        </p>
     </section>
 </template>
 
@@ -33,7 +42,9 @@ export default {
         return {
             user: {},
             errorMessage: null,
-            showError: false
+            errorCode: null,
+            showError: false,
+            connexionTry: 0
         }
     },
     components: {
@@ -51,10 +62,18 @@ export default {
                     const data = await response.json();
                     if (!response.ok) {
                         this.showError = true
-                        return this.errorMessage = data.error;
+                        if (data.errorCode){
+                            this.errorCode = data.errorCode
+                        }
+                        this.connexionTry ++
+                        if (this.errorCode == 40005 || this.errorCode == 40004){
+                            return this.errorMessage = data.error
+                        }
+                        return this.errorMessage = data.error + ' (' + this.connexionTry + ')';
                     }
                     sessionStorage.setItem('token', data.token);
                     sessionStorage.setItem('userId', data.userId);
+                    this.$store.commit("setRequestHeaders", { token: data.token, userId: data.userId })
                     this.$router.push('/');
                     })
                 .catch(() => {
@@ -68,7 +87,10 @@ export default {
 </script>
 
 <style lang="scss">
-    .Login{ 
+    .login{ 
         text-align: center;
+        &--title{
+            font-size: 1.9rem;
+        }
     }
 </style>

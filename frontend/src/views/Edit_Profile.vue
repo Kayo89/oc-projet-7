@@ -2,7 +2,7 @@
     <div class="edit-profile">
         <h1>Modifier Profile</h1>
         <section class="col-md-8 col-lg-7 mx-auto">
-            <form @submit.prevent="sendFile" enctype="multipart/form-data">
+            <form @submit.prevent="saveProfile" enctype="multipart/form-data">
                 <div class="form-row">
                     <div class="form-group col-12">
                         <label for="email">Email</label>
@@ -90,7 +90,7 @@ export default {
         processFile(event){
             this.file = event.target.files[0]
         },
-        async sendFile() {
+        async saveProfile() {
             this.user.userId = parseInt(sessionStorage.getItem('userId'));
             const formData = new FormData();
             if (this.file){
@@ -109,36 +109,6 @@ export default {
                 this.errorMessage = "Une erreur de connection à l'API est survenue."
             }
         },
-        save(){
-            this.user.userId = parseInt(sessionStorage.getItem('userId'));
-            let data = new FormData(this.user);
-            //data.append('file', this.file, this.file.name)
-            console.log(data)
-            axios.put('/api/auth/profile', data)
-                .then(res => {
-                    console.log(res)
-                })
-            // this.user.file  = this.$refs.file.files[0]
-            // const requestOptions = {
-            //     method: "PUT",
-            //     headers: {  "Content-Type": "application/json"},
-            //     body: JSON.stringify(this.user)
-            // }
-            // fetch("/api/auth/profile", requestOptions)
-            //     .then(async response => {
-            //         const data = await response.json();
-            //         if (!response.ok) {
-            //             this.showErrorRes = true
-            //             return this.errorMessage = data.error;
-            //         }
-            //         this.showAlert();
-            //         this.messageResponse = data.message
-            //         })
-            //     .catch(() => {
-            //         this.showErrorRes = true
-            //         this.errorMessage = "Une erreur de connection à l'API est survenue."
-            //         })
-        },
         countDownChanged(dismissCountDown) {
             this.dismissCountDown = dismissCountDown
             },
@@ -156,7 +126,7 @@ export default {
         const userId = { userId: sessionStorage.getItem('userId')};
         const requestOptions = {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: this.$store.state.requestHeaders,
             body: JSON.stringify(userId)
         }
         fetch("/api/auth/profile", requestOptions)
@@ -166,7 +136,7 @@ export default {
                     const error = (data && data.message) || response.statusText;
                     return Promise.reject(error);
                 }
-                this.user = data.user[0];
+                this.user = data.user;
                 this.user.born_date = this.convertDate(this.user.born_date)
                 })
             .catch(error => {

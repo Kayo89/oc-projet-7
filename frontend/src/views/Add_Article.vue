@@ -1,5 +1,5 @@
 <template>
-    <section class="login col-md-8 col-lg-7 mx-auto add-article">
+    <section class="col-md-8 col-lg-7 mx-auto add-article">
         <h1 class="m-4">Ajouter un article</h1>
 
         <form @submit.prevent="addArticle" class="mt-5">
@@ -80,8 +80,7 @@ export default {
             this.article.userId = parseInt(sessionStorage.getItem('userId'));
             const requestOptions = {
                 method: "POST",
-                headers: {  "Content-Type": "application/json", 
-                            "Authorization": "Bearer " + sessionStorage.getItem('token') },
+                headers: this.$store.state.requestHeaders,
                 body: JSON.stringify( this.article )
             }
             fetch("/api/article", requestOptions)
@@ -114,7 +113,7 @@ export default {
 
 <style lang="scss">
     .add-article{
-        h1, p{
+        h1{
             text-align: center;
         }
     }

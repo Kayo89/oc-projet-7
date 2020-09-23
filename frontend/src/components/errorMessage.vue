@@ -1,6 +1,6 @@
 <template>
     <div class="error-mess">
-        <b-alert v-model="showErrorRes" variant="danger" dismissible class="mt-4">
+        <b-alert v-model="showErrorRes" variant="danger" class="mt-4">
             {{ errorMessage }}
         </b-alert>
     </div>
@@ -12,3 +12,9 @@ export default {
     props: ["errorMessage", "showErrorRes"]
 }
 </script>
+
+<style lang="scss">
+    .error-mess{
+        text-align: center;
+    }
+</style>

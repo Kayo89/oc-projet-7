@@ -1,19 +1,21 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+
 import Home from '../views/Home.vue'
+
 import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
-import Profile from '../views/Profile.vue'
+
 import Article from '../views/Article.vue'
-import Articles from '../views/Articles.vue'
 import Add_Article from '../views/Add_Article.vue'
-import Edit_Article from '../views/Edit_Article.vue'
 import Edit from '../views/ModifyContent.vue'
-import User from '../views/User.vue'
+
+import Profile from '../views/Profile.vue'
 import Edit_Profile from '../views/Edit_Profile.vue'
 
+import User from '../views/User.vue'
 
-import Dev from '../views/Dev.vue'
+import Admin from '../views/Admin.vue'
 
 Vue.use(VueRouter)
 
@@ -67,14 +69,6 @@ Vue.use(VueRouter)
     }
   },
   {
-    path: '/articles',
-    name: 'Articles',
-    component: Articles,
-    meta: {
-      title: 'Articles | Groupomania'
-    }
-  },
-  {
     path: '/user/:id',
     name: 'User',
     component: User,
@@ -83,19 +77,11 @@ Vue.use(VueRouter)
     }
   },
   {
-    path: '/edit-article',
-    name: 'Edit Article',
-    component: Edit_Article,
-    meta: {
-      title: 'Edit Article | Groupomania'
-    }
-  },
-  {
     path: '/edit',
     name: 'Edit',
     component: Edit,
     meta: {
-      title: 'Edit | Groupomania'
+      title: 'Modifier | Groupomania'
     }
   },
   {
@@ -107,11 +93,11 @@ Vue.use(VueRouter)
     }
   },
   {
-    path: '/dev',
-    name: 'Dev',
-    component: Dev,
+    path: '/admin',
+    name: 'Admin',
+    component: Admin,
     meta: {
-      title: 'Dev | Groupomania'
+      title: 'Admin | Groupomania'
     }
   }
 ]

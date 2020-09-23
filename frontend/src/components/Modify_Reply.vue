@@ -46,7 +46,7 @@ export default {
         getReply(){
             const requestOptions = {
                 method: "POST",
-                headers: { "Content-Type": "application/json", 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
+                headers: this.$store.state.requestHeaders,
                 body: JSON.stringify( { replyId: this.$store.state.reply.id } )
             }
             fetch("/api/article/reply/modify", requestOptions)
@@ -71,8 +71,7 @@ export default {
         save(){
             const requestOptions = {
                 method: "PUT",
-                headers: {  "Content-Type": "application/json", 
-                            "Authorization": "Bearer " + sessionStorage.getItem('token') },
+                headers: this.$store.state.requestHeaders,
                 body: JSON.stringify( this.form )
             }
             fetch("/api/article/reply", requestOptions)

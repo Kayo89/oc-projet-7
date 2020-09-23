@@ -7,21 +7,21 @@ const auth = require('../middleware/auth');
 router.post('/', auth, articleController.createArticle);
 
 router.get('/', articleController.getAllArticle);
-router.get('/:id', articleController.getOneArticle);
+router.get('/:id', auth, articleController.getOneArticle);
 
-router.post('/reply/modify', articleController.getOneReply);
-
-router.post('/new', articleController.getLastArticle);
+router.post('/sort', auth, articleController.getSortArticles);
 
 router.post('/reply', auth, articleController.replyToArticle);
 router.delete('/reply', auth, articleController.deleteOneReply);
 
-router.delete('/:id', auth, articleController.deleteArticle);
+router.get('/edit/:id', auth, articleController.getEditArticle)
 router.put('/edit', auth, articleController.editArticle);
+router.delete('/:id', auth, articleController.deleteArticle);
 
-router.post('/notation', articleController.addNotationsToArticle)
+router.post('/notation', auth, articleController.addNotationsToArticle);
 
-router.put('/reply', articleController.editReply);
+router.post('/reply/modify', auth, articleController.getOneReply);
+router.put('/reply', auth, articleController.editReply);
 
 
 module.exports = router;

@@ -1,6 +1,6 @@
 <template>
     <div class="modify-article">
-        <form @submit.prevent="save" class="mt-5" >
+        <form @submit.prevent="save" class="mt-5" v-if="showErrorRes === false">
                     <div class="form-row">
                         <div class="form-group col-12">
                             <label for="title">Titre de l'article</label>
@@ -33,8 +33,7 @@ export default {
              form: {
                 title: '',
                 content_txt: '',
-                articleId: this.$store.state.article.id,
-                userId: parseInt(sessionStorage.getItem('userId'))
+                articleId: this.$store.state.article.id
             },
             showErrorRes: false,
             errorMessage: null
@@ -51,8 +50,7 @@ export default {
         save(){
             const requestOptions = {
                 method: "PUT",
-                headers: {  "Content-Type": "application/json", 
-                            "Authorization": "Bearer " + sessionStorage.getItem('token') },
+                headers: this.$store.state.requestHeaders,
                 body: JSON.stringify( this.form )
             }
             fetch("/api/article/edit", requestOptions)
@@ -74,16 +72,17 @@ export default {
                 this.showErrorRes = true
                 return this.errorMessage = "Erreur, aucun article à modifier"
             }
-            const headers = { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') }
-            fetch("/api/article/" + this.form.articleId, { headers })
+            const headers = this.$store.state.requestHeaders
+            fetch("/api/article/edit/" + this.form.articleId, { headers })
                 .then(async response => {
                     const data = await response.json();
 
                     if (!response.ok) {
-                        const error = (data && data.message) || response.statusText;
-                        return Promise.reject(error);
+                        this.showErrorRes = true
+                        return this.errorMessage = data.error
                     }
                     if (!data.article){
+                        this.showErrorRes = true
                         this.errorMessage = {title: "Erreur Article Introuvable"}
                     }else{
                         this.form.title = data.article.title;

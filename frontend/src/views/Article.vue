@@ -1,11 +1,18 @@
 <template>
-    <div class="Article container">
-        <section>
+    <div class="Article container mb-4">
+        <section class="">
+            <router-link to="/"><button class="btn btn-primary see-more-article btn-sm mb-3">Voir tous les articles</button></router-link>
             <div class="card border-secondary">
                 <h5 class="card-header card-title">
-                    <span>Ajouté par <router-link :to="'/user/'+article.user_id"><img v-if="article.photo_url" :src="'http://localhost:3000/images/'+article.photo_url"> {{ article.first_name }} {{ article.last_name }}</router-link> • {{ article.date_created | formatDateFromNow}} <span v-if="article.date_edit" class="editDate">• Modifié {{ article.date_edit | formatDateFromNow}}</span></span>
-                    <section v-if="article.user_id == user_id">
-                        <button  class="btn btn-danger btn-sm" v-if="replyPost == ''" @click="modalShow = !modalShow"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" @click="modify(null, 'article')"><i class="fa fa-pencil" aria-hidden="true"></i> Modifier</button>
+                    <span>Ajouté par 
+                        <router-link :to="'/user/'+article.user_id" v-if="article.user_id != 0">
+                            <img v-if="article.photo_url" :src="'/images/'+article.photo_url"> {{ article.first_name }} {{ article.last_name }}
+                        </router-link>
+                        <span v-else class="user-delete">Utilisateur Supprimé</span> • {{ article.date_created | formatDateFromNow}} 
+                        <span v-if="article.date_edit" class="editDate">• Modifié {{ article.date_edit | formatDateFromNow}}</span>
+                    </span>
+                    <section v-if="article.user_id == user_id || perm === true">
+                        <button  class="btn btn-danger btn-sm" v-if="replyPost == '' || perm === true" @click="modalShow = !modalShow"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" @click="modify(null, 'article')"><i class="fa fa-pencil" aria-hidden="true"></i> Modifier</button>
                     </section>
                 </h5>
                 <div class="card-body">
@@ -17,18 +24,18 @@
                 </div>
             </div>
 
+            <section class="mt-4" v-if="showAddReply === true">
+                <form @submit.prevent="addReply" class="form">
+                    <div class="form-group">
+                        <label for="replyTxt">Contenu du commentaire :</label>
+                        <VueTrix class="replyText" inputId="editor1" v-model="reply.replyText" placeholder="enter your content..."/>
+                    </div>
+                    <button class="btn btn-success"><i class="fa fa fa-share-square-o" aria-hidden="true"></i> Ajouter</button>
+                </form>
+            </section>
             <button class="btn btn-primary mt-5" @click="addReplyButton" id="comButton"><i class="fa fa-reply" aria-hidden="true"></i> {{ addComButton }}</button>
         </section>
 
-        <section class="mt-4" v-if="showAddReply === true">
-            <form @submit.prevent="addReply" class="form">
-                <div class="form-group">
-                    <label for="replyTxt">Contenu du commentaire :</label>
-                    <VueTrix class="replyText" inputId="editor1" v-model="reply.replyText" placeholder="enter your content..."/>
-                </div>
-                <button class="btn btn-success"><i class="fa fa fa-share-square-o" aria-hidden="true"></i> Ajouter</button>
-            </form>
-        </section>
 
         <b-alert v-model="showSucessReply" variant="success" dismissible class="mt-4">
             {{ formResponse }}
@@ -37,8 +44,12 @@
         <section class="mt-3 mb-3 reply" v-for="reply in replyPost" :key="reply.id">
             <div class="card">
                 <div class="card-header card-title">
-                    <span>Répondu par <router-link :to="'/user/'+reply.user_id"><img v-if="reply.photo_url" :src="'http://localhost:3000/images/'+reply.photo_url"> {{ reply.first_name }} {{ reply.last_name }}</router-link></span>
-                    <section v-if="reply.user_id == user_id">
+                    <span>
+                        Répondu par 
+                            <router-link :to="'/user/'+reply.user_id" v-if="reply.user_id != 0"><img v-if="reply.photo_url" :src="'/images/'+reply.photo_url"> {{ reply.first_name }} {{ reply.last_name }}</router-link>
+                            <span v-else class="user-delete">Utilisateur Supprimé</span>
+                    </span>
+                    <section v-if="reply.user_id == user_id || perm === true">
                         <button  class="btn btn-danger btn-sm" @click="deleteReply(reply.id)"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm"  @click="modify(reply.id, 'reply')"><i class="fa fa-pencil" aria-hidden="true"></i> Modifier</button>
                     </section>
                 </div>
@@ -47,11 +58,8 @@
                 </div>
                 <div class="card-footer text-muted footer-reply">
                     <span>Ajouté {{ reply.date_created | formatDateFromNow }}
-                    <span v-if="reply.date_edit" class="editDate">| Modifié {{ reply.date_edit | formatDateFromNow}}</span></span>
-                    
-                    <div class="likes">
-                        <button class="btn btn-success btn-sm" disabled><i class="fa fa-thumbs-up" aria-hidden="true"></i></button> <button class="btn btn-danger btn-sm" disabled><i class="fa fa-thumbs-down" aria-hidden="true"></i></button>
-                    </div>
+                        <span v-if="reply.date_edit" class="editDate">| Modifié {{ reply.date_edit | formatDateFromNow}}</span>
+                    </span>
                 </div>
             </div>
         </section>
@@ -85,6 +93,7 @@ export default {
             likeStatus: null,
             dislikeBool: false,
             likeBool: false,
+            perm: null,
             likeButton: {
                 opacity: 1
             },
@@ -109,12 +118,10 @@ export default {
             const articleId = this.$route.params.id;
             const requestOptions = {
                 method: "DELETE",
-                headers: {  "Content-Type": "application/json", 
-                            "Authorization": 'Bearer ' + sessionStorage.getItem('token')},
+                headers: this.$store.state.requestHeaders,
                 body: JSON.stringify({ userId: this.user_id })
             }
-            console.log(requestOptions)
-            fetch("http://localhost:3000/api/article/" + articleId, requestOptions)
+            fetch("/api/article/" + articleId, requestOptions)
                 .then(async response => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -126,10 +133,10 @@ export default {
                 .catch(() => this.message = "Une erreur de connection à l'API est survenue.")
         },
         like(status){
-            const notation = {likeStatus: status, userId: parseInt(sessionStorage.getItem('userId')), articleId: this.article.id }
+            const notation = {likeStatus: status, articleId: this.article.id }
             const requestOptions = {
                 method: "POST",
-                headers: { "Content-Type": "application/json", 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
+                headers: this.$store.state.requestHeaders,
                 body: JSON.stringify( notation )
             }
             fetch("/api/article/notation", requestOptions)
@@ -161,7 +168,7 @@ export default {
             const articleId = { replyId: id, userId: this.user_id };
             const requestOptions = {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json", 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
+                headers: this.$store.state.requestHeaders,
                 body: JSON.stringify( articleId )
             }
             fetch("/api/article/reply", requestOptions)
@@ -177,8 +184,11 @@ export default {
         },
         getArticle(){
             const id = this.$route.params.id;
-            const headers = { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') }
-            fetch("/api/article/" + id, { headers })
+            const requestOptions = {
+                method: "GET",
+                headers: this.$store.state.requestHeaders
+            }
+            fetch("/api/article/" + id, requestOptions)
                 .then(async response => {
                     const data = await response.json();
 
@@ -192,6 +202,7 @@ export default {
                         this.article = data.article;
                         this.checkUser = data.article.user_id;
                         this.replyPost = data.reply;
+                        this.perm = data.permission;
                         this.likeList();
                         this.updateContent = false;
                     }
@@ -247,7 +258,7 @@ export default {
             this.reply.articleId = this.article.id;
             const requestOptions = {
                 method: "POST",
-                headers: { "Content-Type": "application/json", 'Authorization': 'Bearer ' + sessionStorage.getItem('token') },
+                headers: this.$store.state.requestHeaders,
                 body: JSON.stringify( this.reply )
             }
             fetch("/api/article/reply", requestOptions)
@@ -333,5 +344,8 @@ export default {
     }
     .editDate{
         font-size: .8rem;
+    }
+        .user-delete{
+        font-style: italic;
     }
 </style>

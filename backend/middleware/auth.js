@@ -1,13 +1,18 @@
 const jwt = require('jsonwebtoken');
+const ID_CONN = require('../config/user_id');
+const TOKEN_KEY = ID_CONN.TOKEN();
 
 module.exports = (req, res, next) => {
     try {
         const token = req.headers.authorization.split(' ')[1];
-        const decodedToken = jwt.verify(token, '96qrenxT_kB6jFPYTB4Z.JHqGoc*hz2Awba8grEge_gHkzLcdghG9H4ssVaiPhFn');
+        const decodedToken = jwt.verify(token, TOKEN_KEY);
         const userId = decodedToken.userId;
-        if (req.body.userId !== userId || !req.body.userId){
+        if (parseInt(req.headers.userid) !== userId || !req.headers.userid){
             return res.status(401).json({error: '401 | Requête non authentifiée !'});
         }else{
+            if (decodedToken.permission == 1){
+                req.permission = true
+            }
             next();
         }
     } catch (error) {

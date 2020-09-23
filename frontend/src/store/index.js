@@ -16,6 +16,11 @@ export default new Vuex.Store({
     },
     reply: {
       id: null
+    },
+    requestHeaders:{
+      'Content-Type': 'application/json', 
+      'Authorization': 'Bearer ' + sessionStorage.getItem('token'), 
+      'userId': sessionStorage.getItem('userId')
     }
   },
   mutations: {
@@ -30,6 +35,10 @@ export default new Vuex.Store({
     },
     setReplyId(state, payload){
       state.reply.id = payload.replyId
+    },
+    setRequestHeaders(state, payload){
+      state.requestHeaders.Authorization = 'Bearer '  + payload.token
+      state.requestHeaders.userId = payload.userId
     }
   },
   actions: {
