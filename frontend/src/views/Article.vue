@@ -128,7 +128,7 @@ export default {
                         return this.message = data.error;
                     }
                     
-                    this.$router.push('/articles');
+                    this.$router.push('/');
                     })
                 .catch(() => this.message = "Une erreur de connection à l'API est survenue.")
         },

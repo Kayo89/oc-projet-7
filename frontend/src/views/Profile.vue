@@ -79,7 +79,6 @@ export default {
     data(){
         return {
             user: {},
-            inDev: "",
             showErrorRes: false,
             errorMessage: null,
             perm: false,
