@@ -105,4 +105,34 @@ body{
   border: 1px black solid;
   padding: .5rem;
 }
+.article-txt, .reply-txt{
+  img{
+      max-width: 300px;
+      height: auto;
+    }
+  @media (min-width: 576px){
+    img{
+      max-width: 310px;
+      height: auto;
+    }
+  }
+  @media (min-width: 768px){
+    img{
+      max-width: 620px;
+      height: auto;
+    }
+  }
+  @media (min-width: 992px){
+    img{
+      max-width: 840px;
+      height: auto;
+    }
+  }
+  @media (min-width: 1200px){
+    img{
+      max-width: 1000px;
+      height: auto;
+    }
+  }
+}
 </style>

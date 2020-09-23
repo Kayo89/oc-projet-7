@@ -1,6 +1,6 @@
 <template>
     <div class="Article container mb-4">
-        <section class="">
+        <section>
             <router-link to="/"><button class="btn btn-primary see-more-article btn-sm mb-3">Voir tous les articles</button></router-link>
             <div class="card border-secondary">
                 <h5 class="card-header card-title">
@@ -54,7 +54,7 @@
                     </section>
                 </div>
                 <div class="card-body">
-                    <p v-html="reply.reply_txt"></p>
+                    <p class="reply-txt" v-html="reply.reply_txt"></p>
                 </div>
                 <div class="card-footer text-muted footer-reply">
                     <span>Ajouté {{ reply.date_created | formatDateFromNow }}
