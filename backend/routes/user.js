@@ -12,9 +12,7 @@ router.post('/login', checkIp, userController.login)
 router.post('/profile', auth, userController.profile)
 router.get('/profile/:id', auth, userController.publicProfile)
 
-router.put('/profile', multer, userController.editProfile)
-
-router.put('/upload', multer, userController.uploadImage)
+router.put('/profile', auth, multer, userController.editProfile)
 
 router.delete('/del-account', auth, userController.deleteAccount)
 

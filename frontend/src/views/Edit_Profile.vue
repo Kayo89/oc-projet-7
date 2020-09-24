@@ -100,7 +100,8 @@ export default {
             
             try{
                 await axios.put('/api/auth/profile', 
-                   formData
+                   formData,
+                   { headers: this.$store.state.requestHeaders }
                 );
                 this.showAlert();
                 this.messageResponse = "Profile modifié"

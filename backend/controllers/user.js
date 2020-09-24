@@ -163,10 +163,6 @@ exports.editProfile = (req, res, next) => {
     }
 }
 
-exports.uploadImage = (req, res, next) => {
-    res.json({file: req.file})
-}
-
 exports.deleteAccount = (req, res, next) => {
     let userId = [req.body.deleteAccountId];
         db.query("UPDATE Reply SET user_id=0 WHERE user_id= ?", userId, (err, result) => {
