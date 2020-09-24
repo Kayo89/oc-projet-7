@@ -11,7 +11,7 @@
                         <span v-else class="user-delete">Utilisateur Supprimé</span> • {{ article.date_created | formatDateFromNow}} 
                         <span v-if="article.date_edit" class="editDate">• Modifié {{ article.date_edit | formatDateFromNow}}</span>
                     </span>
-                    <section v-if="article.user_id == user_id || perm === true">
+                    <section v-if="article.user_id == user_id || perm === true" class="post-title">
                         <button  class="btn btn-danger btn-sm" v-if="replyPost == '' || perm === true" @click="modalShow = !modalShow"><i class="fa fa-trash" aria-hidden="true"></i> Supprimer</button> <button class="btn btn-secondary btn-sm" @click="modify(null, 'article')"><i class="fa fa-pencil" aria-hidden="true"></i> Modifier</button>
                     </section>
                 </h5>
@@ -43,7 +43,7 @@
 
         <section class="mt-3 mb-3 reply" v-for="reply in replyPost" :key="reply.id">
             <div class="card">
-                <div class="card-header card-title">
+                <div class="card-header card-title reply__title">
                     <span>
                         Répondu par 
                             <router-link :to="'/user/'+reply.user_id" v-if="reply.user_id != 0"><img v-if="reply.photo_url" :src="'/images/'+reply.photo_url"> {{ reply.first_name }} {{ reply.last_name }}</router-link>
@@ -294,16 +294,16 @@ export default {
             }
         }
         .card-title{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             img{
                 width: 35px;
                 border-radius: 50%;
             }
         }
         .reply{
-            .card-title{
+            &__title{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
                 img{
                     width: 30px;
                     border-radius: 50%;
